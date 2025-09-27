@@ -60,7 +60,7 @@ void initState() {
         return false;
       }
     } catch (e) {
-      print('Greška u provjeri dostupnosti: $e');
+      print('Greška prilikom provjere dostupnosti: $e');
       return false;
     }
   }
