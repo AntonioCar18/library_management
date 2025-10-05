@@ -67,9 +67,10 @@ class _MyAppState extends State<MyApp> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(200.0, 0.0, 0.0, 0.0),
-                  child: Row(
+                Center(
+                  child: Wrap(
+                    spacing: 60, // razmak između stupaca
+                    alignment: WrapAlignment.center,
                     children: <Widget>[
                       Column(
                         children: [
