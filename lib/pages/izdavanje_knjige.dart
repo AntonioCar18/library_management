@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
 
 class IzdavanjeVracanjeKnjige extends StatefulWidget {
   const IzdavanjeVracanjeKnjige({super.key});
@@ -19,6 +21,7 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
   final TextEditingController _naslovController = TextEditingController();
   final TextEditingController _autorController = TextEditingController();
   final TextEditingController _imeOsobeController = TextEditingController();
+  final TextEditingController _datumController = TextEditingController();
 
   bool _populatedFromArgs = false;
   bool _fieldsAreReadOnly = true;
@@ -26,7 +29,7 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
   bool _saveediting = false;
   bool _availability = false;
 
-  final String _baseUrl = '6286f066d9d3.ngrok-free.app'; // zamijeni s tvojim ngrokom
+  final String _baseUrl = '0b5cecd8b187.ngrok-free.app'; // zamijeni s tvojim ngrokom
 
   @override
 void initState() {
@@ -85,7 +88,7 @@ void initState() {
   }
 
 
-  Future<bool> izdajKnjigu(String id, String imeOsobe) async {
+  Future<bool> izdajKnjigu(String id, String imeOsobe, String date) async {
     try {
       final headers = {
         'Content-Type': 'application/json',
@@ -95,6 +98,7 @@ void initState() {
       if (id.isNotEmpty && imeOsobe.isNotEmpty) {
         queryParams['id'] = id;
         queryParams['person'] = imeOsobe;
+        queryParams['date'] = date;
       }
       final uri = Uri.https(_baseUrl, '/library/api/borrow', queryParams);
 
@@ -111,7 +115,7 @@ void initState() {
     }
   }
 
-  Future<bool> provjeriPosudenuKnjigu(String id, String naslov, String autor, String imeOsobe) async {
+  Future<bool> provjeriPosudenuKnjigu(String id, String naslov, String autor, String imeOsobe, String date) async {
     try {
       final uri = Uri.https(_baseUrl, '/library/api/search', {'id': id, 'title': naslov, 'author': autor});
       final headers = {'ngrok-skip-browser-warning': 'true'};
@@ -156,7 +160,7 @@ void initState() {
     }
   }
 
-  Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, bool availability) async {
+  Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, String date, bool availability) async {
   try {
     final uri = Uri.https('6286f066d9d3.ngrok-free.app', '/library/api/editBook');
     final headers = {'Content-Type': 'application/json'};
@@ -165,6 +169,7 @@ void initState() {
       'title': naslov,
       'author': autor,
       'borrowedBy': imeOsobe,
+      'date': date,
       'availability': availability,
     });
 
@@ -217,6 +222,7 @@ void initState() {
       _naslovController.text = args['title'] ?? '';
       _autorController.text = args['author'] ?? '';
       _imeOsobeController.text = args['borrowedBy'] ?? '';
+      _datumController.text = args['date'] ?? '';
       _availability = args['availability'] ?? false;
       _populatedFromArgs = true;
     }
@@ -288,6 +294,26 @@ void initState() {
                               controller: _imeOsobeController,
                               hintText: 'Unesite ime osobe kojoj se izdaje knjiga',
                               readOnly: _fieldsImeReadOnly,
+                            ),
+                            _buildInputRow(
+                              icon: Icons.calendar_month,
+                              label: 'Datum*',
+                              controller: _datumController,
+                              hintText: 'Odaberite datum',
+                              readOnly: _fieldsAreReadOnly,
+                              onTap: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2024),
+                                lastDate: DateTime(2100),
+                                );
+
+                                if (pickedDate != null) {
+                                  String formattedDate = DateFormat('dd.MM.yyyy').format(pickedDate);
+                                  _datumController.text = formattedDate;
+                                }
+                              },
                             ),
                             const SizedBox(height: 60),
                           ],
@@ -433,6 +459,7 @@ void initState() {
     required TextEditingController controller,
     required String hintText,
     bool readOnly = true,
+    VoidCallback? onTap, // ← NOVO
   }) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(30, 20, 0, 20),
@@ -454,6 +481,7 @@ void initState() {
             child: TextField(
               controller: controller,
               readOnly: readOnly,
+              onTap: onTap,
               decoration: InputDecoration(
                 border: const UnderlineInputBorder(),
                 hintText: hintText,
@@ -470,6 +498,7 @@ void initState() {
     String naslov = _naslovController.text.trim();
     String autor = _autorController.text.trim();
     String imeOsobe = _imeOsobeController.text.trim();
+    String date = _datumController.text.trim();
 
     if (naslov.isEmpty || autor.isEmpty || imeOsobe.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -489,7 +518,7 @@ void initState() {
       return;
     }
 
-    bool uspjeh = await izdajKnjigu(id, imeOsobe);
+    bool uspjeh = await izdajKnjigu(id, imeOsobe, date);
     if (uspjeh) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Knjiga izdana za $imeOsobe!'), backgroundColor: Colors.green),
@@ -498,6 +527,7 @@ void initState() {
       _naslovController.clear();
       _autorController.clear();
       _imeOsobeController.clear();
+      _datumController.clear();
       Navigator.pushNamed(context, '/pretrazivanje');
 
     } else {
@@ -512,8 +542,9 @@ void initState() {
     String naslov = _naslovController.text.trim();
     String autor = _autorController.text.trim();
     String imeOsobe = _imeOsobeController.text.trim();
+    String date = _datumController.text.trim();
 
-    if (id.isEmpty || naslov.isEmpty || autor.isEmpty || imeOsobe.isEmpty) {
+    if (id.isEmpty || naslov.isEmpty || autor.isEmpty || imeOsobe.isEmpty ||date.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Molimo ispunite sva polja za povrat.'), backgroundColor: Colors.red),
       );
@@ -529,6 +560,7 @@ void initState() {
       _naslovController.clear();
       _autorController.clear();
       _imeOsobeController.clear();
+      _datumController.clear();
       Navigator.pushNamed(context, '/pretrazivanje');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -542,6 +574,7 @@ void initState() {
   String naslov = _naslovController.text.trim();
   String autor = _autorController.text.trim();
   String imeOsobe = _imeOsobeController.text.trim();
+  String date = _datumController.text.trim();
 
   if (!_saveediting) {
     setState(() {
@@ -551,7 +584,7 @@ void initState() {
     });
   } else {
     // Proslijedi i availability
-    bool uspjeh = await urediSadrzaj(id, naslov, autor, imeOsobe, _availability);
+    bool uspjeh = await urediSadrzaj(id, naslov, autor, imeOsobe, date ,_availability);
     if (uspjeh) {
       setState(() {
         _saveediting = false;

@@ -62,7 +62,7 @@ class _SearchBookState extends State<SearchBook> {
       }
 
       final uri = Uri.https(
-        '6286f066d9d3.ngrok-free.app',
+        '0b5cecd8b187.ngrok-free.app',
         '/library/api/search',
         queryParams,
       );
@@ -165,15 +165,15 @@ class _SearchBookState extends State<SearchBook> {
                             child: SingleChildScrollView(
                                     scrollDirection: Axis.vertical,
                                     child: Padding(
-                                      padding: const EdgeInsets.all(30.0),
+                                      padding: const EdgeInsets.all(15.0),
                                       child: DataTable(
                                         headingRowHeight: 50,
                                         dataRowHeight: 50,
-                                        columnSpacing: 120.0,
+                                        columnSpacing: 100.0,
                                         columns: const [
                                           DataColumn(
                                             label: SizedBox(
-                                              width: 50,
+                                              width: 30,
                                               child: Align(
                                                 alignment: Alignment.center,
                                                 child: Text(
@@ -186,7 +186,7 @@ class _SearchBookState extends State<SearchBook> {
                                           ),
                                           DataColumn(
                                             label: SizedBox(
-                                              width: 200,
+                                              width: 150,
                                               child: Align(
                                                 alignment: Alignment.center,
                                                 child: Text(
@@ -199,7 +199,7 @@ class _SearchBookState extends State<SearchBook> {
                                           ),
                                           DataColumn(
                                             label: SizedBox(
-                                              width: 150,
+                                              width: 100,
                                               child: Align(
                                                 alignment: Alignment.center,
                                                 child: Text(
@@ -216,7 +216,7 @@ class _SearchBookState extends State<SearchBook> {
                                               child: Align(
                                                 alignment: Alignment.center,
                                                 child: Text(
-                                                  'Status knjige',
+                                                  'Status',
                                                   textAlign: TextAlign.center,
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
@@ -225,11 +225,24 @@ class _SearchBookState extends State<SearchBook> {
                                           ),
                                           DataColumn(
                                             label: SizedBox(
-                                              width: 150,
+                                              width: 100,
                                               child: Align(
                                                 alignment: Alignment.center,
                                                 child: Text(
                                                   'Zadužio/la',
+                                                  textAlign: TextAlign.center,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: SizedBox(
+                                              width: 100,
+                                              child: Align(
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  'Datum',
                                                   textAlign: TextAlign.center,
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
@@ -248,13 +261,14 @@ class _SearchBookState extends State<SearchBook> {
                                                 'title': book['title'],
                                                 'author': book['author'],
                                                 'borrowedBy': book['borrowedBy'],
+                                                'date': book['date'],
                                                 },
                                               );
                                             },
                                             cells: [
-                                              centeredCell(book['id'].toString(), width: 50),
-                                              centeredCell(book['title'] ?? '', width: 200),
-                                              centeredCell(book['author'] ?? '', width: 150),
+                                              centeredCell(book['id'].toString(), width: 30),
+                                              centeredCell(book['title'] ?? '', width: 150),
+                                              centeredCell(book['author'] ?? '', width: 100),
                                               DataCell(
                                                 SizedBox(
                                                   width: 50,
@@ -273,13 +287,30 @@ class _SearchBookState extends State<SearchBook> {
                                               ),
                                               DataCell(
                                                 SizedBox(
-                                                  width: 150,
+                                                  width: 100,
                                                   child: Align(
                                                     alignment: Alignment.center,
                                                     child: Text(
                                                       book['availability'] == true
                                                           ? '-'
                                                           : (book['borrowedBy'] ?? ''),
+                                                      textAlign: TextAlign.center,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      softWrap: false,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              DataCell(
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Align(
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      book['availability'] == true
+                                                          ? '-'
+                                                          : (book['date'] ?? ''),
                                                       textAlign: TextAlign.center,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,
