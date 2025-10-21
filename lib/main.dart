@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:softwareknjiznica/pages/upisknjige.dart';
 import 'pages/pretrazivanje.dart';
 import 'pages/izdavanje_knjige.dart';
+import 'dart:io';
 
-void main() {
+void main() async  {
+
+
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatefulWidget {
@@ -15,6 +19,30 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+    Process? backend;
+
+  @override
+  void initState() {
+    super.initState();
+    _startBackend();
+  }
+
+  Future<void> _startBackend() async {
+    backend = await Process.start(
+      'java',
+      ['-jar', r"..\\backend\\app.jar"],
+      mode: ProcessStartMode.detached,
+      runInShell: false,
+    );
+  }
+
+  @override
+  void dispose() {
+    // Kada se Flutter prozor zatvori, backend se ubija
+    backend?.kill();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

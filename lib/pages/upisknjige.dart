@@ -38,14 +38,14 @@ class _EnterBookState extends State<EnterBook> {
     });
 
     try {
-      final uri = Uri.https('6286f066d9d3.ngrok-free.app', '/library/api/addBook');
+      final uri = Uri.http('localhost:8080', '/library/api/addBook');
       final headers = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       };
-      final body = jsonEncode({
+      final body = utf8.encode(jsonEncode({
         'title': title,
         'author': author,
-      });
+      }));
 
       final response = await http.post(uri, headers: headers, body: body);
 

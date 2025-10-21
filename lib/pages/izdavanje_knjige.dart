@@ -29,7 +29,7 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
   bool _saveediting = false;
   bool _availability = false;
 
-  final String _baseUrl = '0b5cecd8b187.ngrok-free.app'; // zamijeni s tvojim ngrokom
+  final String _baseUrl = 'localhost:8080'; // zamijeni s tvojim ngrokom
 
   @override
 void initState() {
@@ -51,7 +51,7 @@ void initState() {
 
   Future<bool> provjeriDostupnostKnjige(String id) async {
     try {
-      final uri = Uri.https(_baseUrl, '/library/api/searchId', {'id': id});
+      final uri = Uri.http(_baseUrl, '/library/api/searchId', {'id': id});
       final headers = {'ngrok-skip-browser-warning': 'true'};
       final response = await http.get(uri, headers: headers);
 
@@ -100,7 +100,7 @@ void initState() {
         queryParams['person'] = imeOsobe;
         queryParams['date'] = date;
       }
-      final uri = Uri.https(_baseUrl, '/library/api/borrow', queryParams);
+      final uri = Uri.http(_baseUrl, '/library/api/borrow', queryParams);
 
       final response = await http.get(uri, headers: headers);
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -117,7 +117,7 @@ void initState() {
 
   Future<bool> provjeriPosudenuKnjigu(String id, String naslov, String autor, String imeOsobe, String date) async {
     try {
-      final uri = Uri.https(_baseUrl, '/library/api/search', {'id': id, 'title': naslov, 'author': autor});
+      final uri = Uri.http(_baseUrl, '/library/api/search', {'id': id, 'title': naslov, 'author': autor});
       final headers = {'ngrok-skip-browser-warning': 'true'};
       final response = await http.get(uri, headers: headers);
 
@@ -145,7 +145,7 @@ void initState() {
       if (id.isNotEmpty) {
         queryParams['id'] = id;
       }
-      final uri = Uri.https(_baseUrl, '/library/api/returnBook', queryParams);
+      final uri = Uri.http(_baseUrl, '/library/api/returnBook', queryParams);
 
       final response = await http.get(uri, headers: headers);
       if (response.statusCode == 200) {
@@ -162,7 +162,7 @@ void initState() {
 
   Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, String date, bool availability) async {
   try {
-    final uri = Uri.https('6286f066d9d3.ngrok-free.app', '/library/api/editBook');
+    final uri = Uri.http('localhost:8080', '/library/api/editBook');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       'id': id,
@@ -198,7 +198,7 @@ void initState() {
       if (id.isNotEmpty) {
         queryParams['id'] = id;
       }
-      final uri = Uri.https(_baseUrl, '/library/api/deleteBook', queryParams);
+      final uri = Uri.http(_baseUrl, '/library/api/deleteBook', queryParams);
 
       final response = await http.get(uri, headers: headers);
       if (response.statusCode == 200) {

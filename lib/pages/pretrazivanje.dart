@@ -61,8 +61,8 @@ class _SearchBookState extends State<SearchBook> {
         queryParams['query'] = _searchQuery;
       }
 
-      final uri = Uri.https(
-        '0b5cecd8b187.ngrok-free.app',
+      final uri = Uri.http(
+        'localhost:8080',
         '/library/api/search',
         queryParams,
       );
