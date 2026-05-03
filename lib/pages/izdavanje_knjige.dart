@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 
 
 class IzdavanjeVracanjeKnjige extends StatefulWidget {
-  const IzdavanjeVracanjeKnjige({super.key});
+  final String? bookId;
+  const IzdavanjeVracanjeKnjige({super.key, this.bookId});
 
   @override
   State<IzdavanjeVracanjeKnjige> createState() => _IzdavanjeVracanjeKnjigeState();
@@ -38,6 +39,11 @@ void initState() {
     _provjeriReadOnlyStatus();
   });
   _provjeriReadOnlyStatus(); // odmah provjeri na početku
+
+  if (widget.bookId != null && widget.bookId!.isNotEmpty) {
+    _idController.text = widget.bookId!;
+    _refreshBookDetails(widget.bookId!);
+  }
 }
 
 
@@ -46,6 +52,7 @@ void initState() {
     _naslovController.dispose();
     _autorController.dispose();
     _imeOsobeController.dispose();
+    _datumController.dispose();
     super.dispose();
   }
 
@@ -64,6 +71,39 @@ void initState() {
       }
     } catch (e) {
       print('Greška prilikom provjere dostupnosti: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _refreshBookDetails(String id) async {
+    if (id.isEmpty) return false;
+
+    try {
+      final uri = Uri.http(_baseUrl, '/library/api/searchId', {'id': id});
+      final headers = {'ngrok-skip-browser-warning': 'true'};
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode != 200) return false;
+
+      final rawData = jsonDecode(response.body);
+      final data = rawData is List && rawData.isNotEmpty ? rawData[0] : rawData;
+      if (data is! Map<String, dynamic> || data.isEmpty) return false;
+
+      final borrowedBy = data['borrowedBy']?.toString() ?? '';
+      final availability = data['availability'] ?? false;
+
+      setState(() {
+        _naslovController.text = data['title'] ?? _naslovController.text;
+        _autorController.text = data['author'] ?? _autorController.text;
+        _imeOsobeController.text = borrowedBy == 'N/A' ? '-' : borrowedBy;
+        _datumController.text = data['date'] ?? _datumController.text;
+        _availability = availability;
+        _fieldsImeReadOnly = !availability;
+      });
+
+      return true;
+    } catch (e) {
+      print('Greška pri osvježavanju podataka knjige: $e');
       return false;
     }
   }
@@ -221,7 +261,8 @@ void initState() {
       _idController.text = args['id']?.toString() ?? '';
       _naslovController.text = args['title'] ?? '';
       _autorController.text = args['author'] ?? '';
-      _imeOsobeController.text = args['borrowedBy'] ?? '';
+      final borrowedBy = args['borrowedBy']?.toString() ?? '';
+      _imeOsobeController.text = borrowedBy == 'N/A' ? '-' : borrowedBy;
       _datumController.text = args['date'] ?? '';
       _availability = args['availability'] ?? false;
       _populatedFromArgs = true;
@@ -407,7 +448,7 @@ void initState() {
             onExit: () => setState(() => _isHovering2 = false),
             icon: Icons.read_more,
             label: 'Upravljanje knjigom',
-            onTap: () => Navigator.pushNamed(context, '/izdavanje_knjige'),
+            onTap: () => Navigator.pushNamed(context, '/pretrazivanje'),
           ),
           _buildSidebarItem(
             hovering: _isHovering3,
@@ -523,13 +564,7 @@ void initState() {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Knjiga izdana za $imeOsobe!'), backgroundColor: Colors.green),
       );
-      _idController.clear();
-      _naslovController.clear();
-      _autorController.clear();
-      _imeOsobeController.clear();
-      _datumController.clear();
-      Navigator.pushNamed(context, '/pretrazivanje');
-
+      await _refreshBookDetails(id);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Došlo je do greške prilikom izdavanja.'), backgroundColor: Colors.red),
@@ -556,12 +591,7 @@ void initState() {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Knjiga uspješno vraćena!'), backgroundColor: Colors.green),
       );
-      _idController.clear();
-      _naslovController.clear();
-      _autorController.clear();
-      _imeOsobeController.clear();
-      _datumController.clear();
-      Navigator.pushNamed(context, '/pretrazivanje');
+      await _refreshBookDetails(id);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Došlo je do greške pri povratu knjige.'), backgroundColor: Colors.red),

@@ -211,7 +211,7 @@ class _EnterBookState extends State<EnterBook> {
                   },
                   child: InkWell(
                     onTap: () {
-                      Navigator.pushNamed(context, '/izdavanje_knjige');
+                      Navigator.pushNamed(context, '/pretrazivanje');
                     },
                     child: AnimatedContainer(
                       duration: Duration(milliseconds: 200),

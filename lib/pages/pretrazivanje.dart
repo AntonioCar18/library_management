@@ -254,15 +254,8 @@ class _SearchBookState extends State<SearchBook> {
                                           return DataRow(
                                             onSelectChanged: (_){
                                               Navigator.pushNamed(
-                                                context, 
-                                                '/izdavanje_knjige',
-                                                arguments: {
-                                                'id': book['id'],
-                                                'title': book['title'],
-                                                'author': book['author'],
-                                                'borrowedBy': book['borrowedBy'],
-                                                'date': book['date'],
-                                                },
+                                                context,
+                                                '/${book['id']}',
                                               );
                                             },
                                             cells: [
@@ -369,7 +362,7 @@ class _SearchBookState extends State<SearchBook> {
             hovering: _isHovering2,
             onEnter: () => setState(() => _isHovering2 = true),
             onExit: () => setState(() => _isHovering2 = false),
-            onTap: () => Navigator.pushNamed(context, '/izdavanje_knjige'),
+            onTap: () => Navigator.pushNamed(context, '/pretrazivanje'),
           ),
           buildSidebarItem(
             label: 'Povratak na početnu',
