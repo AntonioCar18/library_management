@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _startBackend();
+    //_startBackend();
   }
 
   Future<void> _startBackend() async {
@@ -37,12 +37,12 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  @override
-  void dispose() {
+  //@override
+  //void dispose() {
     // Kada se Flutter prozor zatvori, backend se ubija
-    backend?.kill();
-    super.dispose();
-  }
+    //backend?.kill();
+    //super.dispose();
+  //}
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,18 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/pretrazivanje': (context) => const SearchBook(),
         '/upisknjige': (context) => const EnterBook(),
-        '/izdavanje_knjige': (context) =>  IzdavanjeVracanjeKnjige()
+      },
+      onGenerateRoute: (settings) {
+        final name = settings.name ?? '';
+        final uri = Uri.parse(name);
+        if (uri.pathSegments.length == 1 && uri.pathSegments.first.isNotEmpty) {
+          final id = uri.pathSegments.first;
+          return MaterialPageRoute(
+            builder: (context) => IzdavanjeVracanjeKnjige(bookId: id),
+            settings: settings,
+          );
+        }
+        return null;
       },
       home: Scaffold(
         appBar: AppBar(
@@ -148,7 +159,7 @@ class _MyAppState extends State<MyApp> {
                         children: <Widget>[
                           TextButton(
                             onPressed: (){
-                              Navigator.pushNamed(context, '/izdavanje_knjige');
+                              Navigator.pushNamed(context, '/pretrazivanje');
                             },
                             child: const CircleAvatar(
                               radius: 120.0,
