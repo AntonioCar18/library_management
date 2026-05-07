@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import '../config/app_config.dart';
 
 
 class IzdavanjeVracanjeKnjige extends StatefulWidget {
@@ -30,8 +31,6 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
   bool _saveediting = false;
   bool _availability = false;
 
-  final String _baseUrl = 'localhost:8080'; // zamijeni s tvojim ngrokom
-
   @override
 void initState() {
   super.initState();
@@ -58,9 +57,8 @@ void initState() {
 
   Future<bool> provjeriDostupnostKnjige(String id) async {
     try {
-      final uri = Uri.http(_baseUrl, '/library/api/searchId', {'id': id});
-      final headers = {'ngrok-skip-browser-warning': 'true'};
-      final response = await http.get(uri, headers: headers);
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {'id': id});
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -79,9 +77,8 @@ void initState() {
     if (id.isEmpty) return false;
 
     try {
-      final uri = Uri.http(_baseUrl, '/library/api/searchId', {'id': id});
-      final headers = {'ngrok-skip-browser-warning': 'true'};
-      final response = await http.get(uri, headers: headers);
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {'id': id});
+      final response = await http.get(uri);
 
       if (response.statusCode != 200) return false;
 
@@ -132,7 +129,6 @@ void initState() {
     try {
       final headers = {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
       };
       final Map<String, String> queryParams = {};
       if (id.isNotEmpty && imeOsobe.isNotEmpty) {
@@ -140,7 +136,7 @@ void initState() {
         queryParams['person'] = imeOsobe;
         queryParams['date'] = date;
       }
-      final uri = Uri.http(_baseUrl, '/library/api/borrow', queryParams);
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/borrow', queryParams);
 
       final response = await http.get(uri, headers: headers);
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -157,9 +153,8 @@ void initState() {
 
   Future<bool> provjeriPosudenuKnjigu(String id, String naslov, String autor, String imeOsobe, String date) async {
     try {
-      final uri = Uri.http(_baseUrl, '/library/api/search', {'id': id, 'title': naslov, 'author': autor});
-      final headers = {'ngrok-skip-browser-warning': 'true'};
-      final response = await http.get(uri, headers: headers);
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/search', {'id': id, 'title': naslov, 'author': autor});
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -177,17 +172,13 @@ void initState() {
 
   Future<bool> vratiKnjigu(String id) async {
     try {
-      final headers = {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      };
       final Map<String, String> queryParams = {};
       if (id.isNotEmpty) {
         queryParams['id'] = id;
       }
-      final uri = Uri.http(_baseUrl, '/library/api/returnBook', queryParams);
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/returnBook', queryParams);
 
-      final response = await http.get(uri, headers: headers);
+      final response = await http.get(uri);
       if (response.statusCode == 200) {
         return true;
       } else {
@@ -202,7 +193,7 @@ void initState() {
 
   Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, String date, bool availability) async {
   try {
-    final uri = Uri.http('localhost:8080', '/library/api/editBook');
+    final uri = Uri.http(AppConfig.backendUrl, '/library/api/editBook');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       'id': id,
@@ -230,17 +221,13 @@ void initState() {
 
   Future<bool> obrisiKnjigu(String id) async {
     try {
-      final headers = {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      };
       final Map<String, String> queryParams = {};
       if (id.isNotEmpty) {
         queryParams['id'] = id;
       }
-      final uri = Uri.http(_baseUrl, '/library/api/deleteBook', queryParams);
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/deleteBook', queryParams);
 
-      final response = await http.get(uri, headers: headers);
+      final response = await http.get(uri);
       if (response.statusCode == 200) {
         return true;
       } else {

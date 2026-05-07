@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 
 class EnterBook extends StatefulWidget {
   const EnterBook({super.key});
@@ -38,7 +39,7 @@ class _EnterBookState extends State<EnterBook> {
     });
 
     try {
-      final uri = Uri.http('localhost:8080', '/library/api/addBook');
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/addBook');
       final headers = {
         'Content-Type': 'application/json; charset=utf-8',
       };

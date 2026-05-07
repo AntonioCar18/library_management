@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:softwareknjiznica/pages/upisknjige.dart';
 import 'pages/pretrazivanje.dart';
 import 'pages/izdavanje_knjige.dart';
+import 'pages/test_page.dart';
 import 'dart:io';
 
 void main() async  {
@@ -52,6 +53,7 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/pretrazivanje': (context) => const SearchBook(),
         '/upisknjige': (context) => const EnterBook(),
+        '/test': (context) => const TestPage(),
       },
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';

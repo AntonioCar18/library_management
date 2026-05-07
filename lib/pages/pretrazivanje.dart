@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 
 class SearchBook extends StatefulWidget {
   const SearchBook({super.key});
@@ -62,16 +63,12 @@ class _SearchBookState extends State<SearchBook> {
       }
 
       final uri = Uri.http(
-        'localhost:8080',
+        AppConfig.backendUrl,
         '/library/api/search',
         queryParams,
       );
 
-      final headers = {
-        'ngrok-skip-browser-warning': 'true',
-      };
-
-      final response = await http.get(uri, headers: headers);
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
