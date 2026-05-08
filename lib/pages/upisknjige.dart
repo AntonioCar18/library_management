@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
+import '../services/auth_service.dart';
 
 class EnterBook extends StatefulWidget {
   const EnterBook({super.key});
@@ -18,6 +18,7 @@ class _EnterBookState extends State<EnterBook> {
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
 
   bool _isLoading = false;
   String? _message;
@@ -25,8 +26,9 @@ class _EnterBookState extends State<EnterBook> {
   Future<void> addBook() async {
     final String title = _titleController.text.trim();
     final String author = _authorController.text.trim();
+    final int? id = int.tryParse(_idController.text.trim());
 
-    if (title.isEmpty || author.isEmpty) {
+    if (title.isEmpty || author.isEmpty || id == null) {
       setState(() {
         _message = "Molimo unesite i naslov i autora knjige.";
       });
@@ -44,17 +46,23 @@ class _EnterBookState extends State<EnterBook> {
         'Content-Type': 'application/json; charset=utf-8',
       };
       final body = utf8.encode(jsonEncode({
+        'id': id,
         'title': title,
         'author': author,
       }));
 
-      final response = await http.post(uri, headers: headers, body: body);
+      final response = await AuthService.authenticatedPost(
+        uri,
+        headers: headers,
+        body: body,
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         setState(() {
           _message = "Knjiga je uspješno dodana!";
           _titleController.clear();
           _authorController.clear();
+          _idController.clear();
         });
       } else {
         setState(() {
@@ -76,6 +84,7 @@ class _EnterBookState extends State<EnterBook> {
   void dispose() {
     _titleController.dispose();
     _authorController.dispose();
+    _idController.dispose();
     super.dispose();
   }
 
@@ -111,179 +120,7 @@ class _EnterBookState extends State<EnterBook> {
       ),
       body: Row(
         children: [
-          Container(
-            width: 300.0,
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MouseRegion(
-                  onEnter: (_) {
-                    setState(() {
-                      _isHovering = true;
-                    });
-                  },
-                  onExit: (_) {
-                    setState(() {
-                      _isHovering = false;
-                    });
-                  },
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/pretrazivanje');
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        color: _isHovering
-                            ? Colors.grey.shade300
-                            : Colors.grey.shade300.withAlpha(0),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 20.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.search),
-                            SizedBox(width: 15.0),
-                            Text(
-                              'Pretraživanje knjige',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                MouseRegion(
-                  onEnter: (_) {
-                    setState(() {
-                      _isHovering1 = true;
-                    });
-                  },
-                  onExit: (_) {
-                    setState(() {
-                      _isHovering1 = false;
-                    });
-                  },
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/upisknjige');
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        color: _isHovering1
-                            ? Colors.grey.shade300
-                            : Colors.grey.shade300.withAlpha(0),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 20.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add),
-                            SizedBox(width: 15.0),
-                            Text(
-                              'Dodavanje nove knjige',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                MouseRegion(
-                  onEnter: (_) {
-                    setState(() {
-                      _isHovering2 = true;
-                    });
-                  },
-                  onExit: (_) {
-                    setState(() {
-                      _isHovering2 = false;
-                    });
-                  },
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/pretrazivanje');
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        color: _isHovering2
-                            ? Colors.grey.shade300
-                            : Colors.grey.shade300.withAlpha(0),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 20.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.read_more),
-                            SizedBox(width: 15.0),
-                            Text(
-                              'Upravljanje knjigom',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                MouseRegion(
-                  onEnter: (_) {
-                    setState(() {
-                      _isHovering3 = true;
-                    });
-                  },
-                  onExit: (_) {
-                    setState(() {
-                      _isHovering3 = false;
-                    });
-                  },
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/');
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        color: _isHovering3
-                            ? Colors.grey.shade300
-                            : Colors.grey.shade300.withAlpha(0),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 20.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.home),
-                            SizedBox(width: 15.0),
-                            Text(
-                              'Povratak na početnu',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildSidebar(),
           Expanded(
             child: Container(
               color: Colors.grey.shade100,
@@ -310,6 +147,39 @@ class _EnterBookState extends State<EnterBook> {
                             height: 5.0,
                             color: Colors.grey.shade100,
                             thickness: 1.0,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(30.0, 20.0, 0.0, 20.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 150,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.book),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'ID*',
+                                        style: TextStyle(
+                                          fontSize: 20.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 300,
+                                  child: TextField(
+                                    controller: _idController,
+                                    decoration: InputDecoration(
+                                      border: UnderlineInputBorder(),
+                                      hintText: 'Unesite ID knjige',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           Padding(
                             padding: EdgeInsets.fromLTRB(30.0, 20.0, 0.0, 20.0),
@@ -432,6 +302,73 @@ class _EnterBookState extends State<EnterBook> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSidebar() {
+    return Container(
+      width: 300,
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSidebarItem(
+            hovering: _isHovering,
+            onEnter: () => setState(() => _isHovering = true),
+            onExit: () => setState(() => _isHovering = false),
+            icon: Icons.search,
+            label: 'Pretraživanje knjige',
+            onTap: () => Navigator.pushNamed(context, '/pretrazivanje'),
+          ),
+          _buildSidebarItem(
+            hovering: _isHovering1,
+            onEnter: () => setState(() => _isHovering1 = true),
+            onExit: () => setState(() => _isHovering1 = false),
+            icon: Icons.add,
+            label: 'Dodavanje nove knjige',
+            onTap: () => Navigator.pushNamed(context, '/upisknjige'),
+          ),
+          _buildSidebarItem(
+            hovering: _isHovering3,
+            onEnter: () => setState(() => _isHovering3 = true),
+            onExit: () => setState(() => _isHovering3 = false),
+            icon: Icons.home,
+            label: 'Povratak na početnu',
+            onTap: () => Navigator.pushNamed(context, '/home'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarItem({
+    required bool hovering,
+    required VoidCallback onEnter,
+    required VoidCallback onExit,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return MouseRegion(
+      onEnter: (_) => onEnter(),
+      onExit: (_) => onExit(),
+      child: InkWell(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: hovering ? Colors.grey.shade300 : Colors.transparent,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          child: Row(
+            children: [
+              Icon(icon),
+              const SizedBox(width: 15),
+              Text(label, style: const TextStyle(fontSize: 18)),
+            ],
+          ),
+        ),
       ),
     );
   }

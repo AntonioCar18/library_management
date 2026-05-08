@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import '../config/app_config.dart';
+import '../services/auth_service.dart';
 
 
 class IzdavanjeVracanjeKnjige extends StatefulWidget {
@@ -58,7 +58,7 @@ void initState() {
   Future<bool> provjeriDostupnostKnjige(String id) async {
     try {
       final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {'id': id});
-      final response = await http.get(uri);
+      final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -78,7 +78,7 @@ void initState() {
 
     try {
       final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {'id': id});
-      final response = await http.get(uri);
+      final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode != 200) return false;
 
@@ -138,7 +138,7 @@ void initState() {
       }
       final uri = Uri.http(AppConfig.backendUrl, '/library/api/borrow', queryParams);
 
-      final response = await http.get(uri, headers: headers);
+      final response = await AuthService.authenticatedGet(uri);
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
@@ -154,7 +154,7 @@ void initState() {
   Future<bool> provjeriPosudenuKnjigu(String id, String naslov, String autor, String imeOsobe, String date) async {
     try {
       final uri = Uri.http(AppConfig.backendUrl, '/library/api/search', {'id': id, 'title': naslov, 'author': autor});
-      final response = await http.get(uri);
+      final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -178,7 +178,7 @@ void initState() {
       }
       final uri = Uri.http(AppConfig.backendUrl, '/library/api/returnBook', queryParams);
 
-      final response = await http.get(uri);
+      final response = await AuthService.authenticatedGet(uri);
       if (response.statusCode == 200) {
         return true;
       } else {
@@ -194,7 +194,6 @@ void initState() {
   Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, String date, bool availability) async {
   try {
     final uri = Uri.http(AppConfig.backendUrl, '/library/api/editBook');
-    final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       'id': id,
       'title': naslov,
@@ -204,7 +203,11 @@ void initState() {
       'availability': availability,
     });
 
-    final response = await http.post(uri, headers: headers, body: body);
+    final response = await AuthService.authenticatedPost(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return true;
@@ -227,7 +230,7 @@ void initState() {
       }
       final uri = Uri.http(AppConfig.backendUrl, '/library/api/deleteBook', queryParams);
 
-      final response = await http.get(uri);
+      final response = await AuthService.authenticatedGet(uri);
       if (response.statusCode == 200) {
         return true;
       } else {
@@ -430,20 +433,12 @@ void initState() {
             onTap: () => Navigator.pushNamed(context, '/upisknjige'),
           ),
           _buildSidebarItem(
-            hovering: _isHovering2,
-            onEnter: () => setState(() => _isHovering2 = true),
-            onExit: () => setState(() => _isHovering2 = false),
-            icon: Icons.read_more,
-            label: 'Upravljanje knjigom',
-            onTap: () => Navigator.pushNamed(context, '/pretrazivanje'),
-          ),
-          _buildSidebarItem(
             hovering: _isHovering3,
             onEnter: () => setState(() => _isHovering3 = true),
             onExit: () => setState(() => _isHovering3 = false),
             icon: Icons.home,
             label: 'Povratak na početnu',
-            onTap: () => Navigator.pushNamed(context, '/'),
+            onTap: () => Navigator.pushNamed(context, '/home'),
           ),
         ],
       ),

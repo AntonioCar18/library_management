@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
+import '../services/auth_service.dart';
 
 class SearchBook extends StatefulWidget {
   const SearchBook({super.key});
@@ -68,7 +68,7 @@ class _SearchBookState extends State<SearchBook> {
         queryParams,
       );
 
-      final response = await http.get(uri);
+      final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
@@ -354,20 +354,12 @@ class _SearchBookState extends State<SearchBook> {
             onTap: () => Navigator.pushNamed(context, '/upisknjige'),
           ),
           buildSidebarItem(
-            label: 'Upravljanje knjigom',
-            icon: Icons.read_more,
-            hovering: _isHovering2,
-            onEnter: () => setState(() => _isHovering2 = true),
-            onExit: () => setState(() => _isHovering2 = false),
-            onTap: () => Navigator.pushNamed(context, '/pretrazivanje'),
-          ),
-          buildSidebarItem(
             label: 'Povratak na početnu',
             icon: Icons.home,
             hovering: _isHovering3,
             onEnter: () => setState(() => _isHovering3 = true),
             onExit: () => setState(() => _isHovering3 = false),
-            onTap: () => Navigator.pushNamed(context, '/'),
+            onTap: () => Navigator.pushNamed(context, '/home'),
           ),
         ],
       ),

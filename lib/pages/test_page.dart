@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+
 import '../config/app_config.dart';
+import '../services/auth_service.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({super.key});
@@ -29,7 +30,7 @@ class _TestPageState extends State<TestPage> {
       });
 
       final uri = Uri.http(AppConfig.backendUrl, '/library/api/test');
-      final response = await http.get(uri);
+      final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode == 200) {
         setState(() {
