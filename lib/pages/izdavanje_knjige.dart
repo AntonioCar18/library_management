@@ -24,6 +24,7 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
   final TextEditingController _autorController = TextEditingController();
   final TextEditingController _imeOsobeController = TextEditingController();
   final TextEditingController _datumController = TextEditingController();
+  final TextEditingController _signatureController = TextEditingController();
 
   bool _populatedFromArgs = false;
   bool _fieldsAreReadOnly = true;
@@ -52,6 +53,7 @@ void initState() {
     _autorController.dispose();
     _imeOsobeController.dispose();
     _datumController.dispose();
+    _signatureController.dispose();
     super.dispose();
   }
 
@@ -94,6 +96,7 @@ void initState() {
         _autorController.text = data['author'] ?? _autorController.text;
         _imeOsobeController.text = borrowedBy == 'N/A' ? '-' : borrowedBy;
         _datumController.text = data['date'] ?? _datumController.text;
+        _signatureController.text = data['signature'] ?? _signatureController.text;
         _availability = availability;
         _fieldsImeReadOnly = !availability;
       });
@@ -191,7 +194,7 @@ void initState() {
     }
   }
 
-  Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, String date, bool availability) async {
+  Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, String date, bool availability, String signature) async {
   try {
     final uri = Uri.http(AppConfig.backendUrl, '/library/api/editBook');
     final body = jsonEncode({
@@ -201,6 +204,7 @@ void initState() {
       'borrowedBy': imeOsobe,
       'date': date,
       'availability': availability,
+      'signature': signature,
     });
 
     final response = await AuthService.authenticatedPost(
@@ -254,6 +258,7 @@ void initState() {
       final borrowedBy = args['borrowedBy']?.toString() ?? '';
       _imeOsobeController.text = borrowedBy == 'N/A' ? '-' : borrowedBy;
       _datumController.text = args['date'] ?? '';
+      _signatureController.text = args['signature'] ?? '';
       _availability = args['availability'] ?? false;
       _populatedFromArgs = true;
     }
@@ -345,6 +350,13 @@ void initState() {
                                   _datumController.text = formattedDate;
                                 }
                               },
+                            ),
+                            _buildInputRow(
+                              icon: Icons.bookmark,
+                              label: 'Signatura',
+                              controller: _signatureController,
+                              hintText: 'Signatura knjige',
+                              readOnly: _fieldsAreReadOnly,
                             ),
                             const SizedBox(height: 60),
                           ],
@@ -587,6 +599,7 @@ void initState() {
   String autor = _autorController.text.trim();
   String imeOsobe = _imeOsobeController.text.trim();
   String date = _datumController.text.trim();
+  String signature = _signatureController.text.trim();
 
   if (!_saveediting) {
     setState(() {
@@ -596,7 +609,7 @@ void initState() {
     });
   } else {
     // Proslijedi i availability
-    bool uspjeh = await urediSadrzaj(id, naslov, autor, imeOsobe, date ,_availability);
+    bool uspjeh = await urediSadrzaj(id, naslov, autor, imeOsobe, date ,_availability, signature);
     if (uspjeh) {
       setState(() {
         _saveediting = false;

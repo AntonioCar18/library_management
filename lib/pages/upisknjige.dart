@@ -19,6 +19,7 @@ class _EnterBookState extends State<EnterBook> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
+  final TextEditingController _signatureController = TextEditingController();
 
   bool _isLoading = false;
   String? _message;
@@ -49,6 +50,7 @@ class _EnterBookState extends State<EnterBook> {
         'id': id,
         'title': title,
         'author': author,
+        'signature': _signatureController.text.trim(),
       }));
 
       final response = await AuthService.authenticatedPost(
@@ -63,6 +65,7 @@ class _EnterBookState extends State<EnterBook> {
           _titleController.clear();
           _authorController.clear();
           _idController.clear();
+          _signatureController.clear();
         });
       } else {
         setState(() {
@@ -85,6 +88,7 @@ class _EnterBookState extends State<EnterBook> {
     _titleController.dispose();
     _authorController.dispose();
     _idController.dispose();
+    _signatureController.dispose();
     super.dispose();
   }
 
@@ -242,6 +246,40 @@ class _EnterBookState extends State<EnterBook> {
                                       border: UnderlineInputBorder(),
                                       hintText:
                                           'Unesite ime i prezime autora knjige',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(30.0, 20.0, 0.0, 20.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 150,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.bookmark),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Signatura*',
+                                        style: TextStyle(
+                                          fontSize: 20.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 300,
+                                  child: TextField(
+                                    controller: _signatureController,
+                                    decoration: InputDecoration(
+                                      border: UnderlineInputBorder(),
+                                      hintText:
+                                          'Unesite signaturu knjige',
                                     ),
                                   ),
                                 ),
