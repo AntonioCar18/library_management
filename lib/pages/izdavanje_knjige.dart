@@ -4,13 +4,13 @@ import 'package:intl/intl.dart';
 import '../config/app_config.dart';
 import '../services/auth_service.dart';
 
-
 class IzdavanjeVracanjeKnjige extends StatefulWidget {
   final String? bookId;
   const IzdavanjeVracanjeKnjige({super.key, this.bookId});
 
   @override
-  State<IzdavanjeVracanjeKnjige> createState() => _IzdavanjeVracanjeKnjigeState();
+  State<IzdavanjeVracanjeKnjige> createState() =>
+      _IzdavanjeVracanjeKnjigeState();
 }
 
 class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
@@ -33,19 +33,18 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
   bool _availability = false;
 
   @override
-void initState() {
-  super.initState();
-  _idController.addListener(() {
-    _provjeriReadOnlyStatus();
-  });
-  _provjeriReadOnlyStatus(); // odmah provjeri na početku
+  void initState() {
+    super.initState();
+    _idController.addListener(() {
+      _provjeriReadOnlyStatus();
+    });
+    _provjeriReadOnlyStatus(); // odmah provjeri na početku
 
-  if (widget.bookId != null && widget.bookId!.isNotEmpty) {
-    _idController.text = widget.bookId!;
-    _refreshBookDetails(widget.bookId!);
+    if (widget.bookId != null && widget.bookId!.isNotEmpty) {
+      _idController.text = widget.bookId!;
+      _refreshBookDetails(widget.bookId!);
+    }
   }
-}
-
 
   void dispose() {
     _idController.dispose();
@@ -59,11 +58,14 @@ void initState() {
 
   Future<bool> provjeriDostupnostKnjige(String id) async {
     try {
-      final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {'id': id});
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {
+        'id': id,
+      });
       final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final data = jsonDecode(decodedBody);
         if (data.isEmpty) return false;
         return data['availability'] ?? false;
       } else {
@@ -79,12 +81,15 @@ void initState() {
     if (id.isEmpty) return false;
 
     try {
-      final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {'id': id});
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/searchId', {
+        'id': id,
+      });
       final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode != 200) return false;
 
-      final rawData = jsonDecode(response.body);
+      final decodedBody = utf8.decode(response.bodyBytes);
+      final rawData = jsonDecode(decodedBody);
       final data = rawData is List && rawData.isNotEmpty ? rawData[0] : rawData;
       if (data is! Map<String, dynamic> || data.isEmpty) return false;
 
@@ -96,7 +101,8 @@ void initState() {
         _autorController.text = data['author'] ?? _autorController.text;
         _imeOsobeController.text = borrowedBy == 'N/A' ? '-' : borrowedBy;
         _datumController.text = data['date'] ?? _datumController.text;
-        _signatureController.text = data['signature'] ?? _signatureController.text;
+        _signatureController.text =
+            data['signature'] ?? _signatureController.text;
         _availability = availability;
         _fieldsImeReadOnly = !availability;
       });
@@ -122,30 +128,34 @@ void initState() {
     bool dostupna = await provjeriDostupnostKnjige(id);
 
     setState(() {
-      _fieldsImeReadOnly = !dostupna; // ako nije dostupna, ime osobe postaje readonly
-      _availability = dostupna;   
+      _fieldsImeReadOnly =
+          !dostupna; // ako nije dostupna, ime osobe postaje readonly
+      _availability = dostupna;
     });
   }
 
-
   Future<bool> izdajKnjigu(String id, String imeOsobe, String date) async {
     try {
-      final headers = {
-        'Content-Type': 'application/json',
-      };
+      final headers = {'Content-Type': 'application/json'};
       final Map<String, String> queryParams = {};
       if (id.isNotEmpty && imeOsobe.isNotEmpty) {
         queryParams['id'] = id;
         queryParams['person'] = imeOsobe;
         queryParams['date'] = date;
       }
-      final uri = Uri.http(AppConfig.backendUrl, '/library/api/borrow', queryParams);
+      final uri = Uri.http(
+        AppConfig.backendUrl,
+        '/library/api/borrow',
+        queryParams,
+      );
 
       final response = await AuthService.authenticatedGet(uri);
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
-        print('Greška pri izdavanju: ${response.statusCode} - ${response.body}');
+        print(
+          'Greška pri izdavanju: ${response.statusCode} - ${response.body}',
+        );
         return false;
       }
     } catch (e) {
@@ -154,13 +164,24 @@ void initState() {
     }
   }
 
-  Future<bool> provjeriPosudenuKnjigu(String id, String naslov, String autor, String imeOsobe, String date) async {
+  Future<bool> provjeriPosudenuKnjigu(
+    String id,
+    String naslov,
+    String autor,
+    String imeOsobe,
+    String date,
+  ) async {
     try {
-      final uri = Uri.http(AppConfig.backendUrl, '/library/api/search', {'id': id, 'title': naslov, 'author': autor});
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/search', {
+        'id': id,
+        'title': naslov,
+        'author': autor,
+      });
       final response = await AuthService.authenticatedGet(uri);
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final data = jsonDecode(decodedBody);
         if (data.isEmpty) return false;
         final knjiga = data[0];
         return knjiga['borrowedBy'] == imeOsobe;
@@ -179,7 +200,11 @@ void initState() {
       if (id.isNotEmpty) {
         queryParams['id'] = id;
       }
-      final uri = Uri.http(AppConfig.backendUrl, '/library/api/returnBook', queryParams);
+      final uri = Uri.http(
+        AppConfig.backendUrl,
+        '/library/api/returnBook',
+        queryParams,
+      );
 
       final response = await AuthService.authenticatedGet(uri);
       if (response.statusCode == 200) {
@@ -194,37 +219,46 @@ void initState() {
     }
   }
 
-  Future<bool> urediSadrzaj(String id, String naslov, String autor, String imeOsobe, String date, bool availability, String signature) async {
-  try {
-    final uri = Uri.http(AppConfig.backendUrl, '/library/api/editBook');
-    final body = jsonEncode({
-      'id': id,
-      'title': naslov,
-      'author': autor,
-      'borrowedBy': imeOsobe,
-      'date': date,
-      'availability': availability,
-      'signature': signature,
-    });
+  Future<bool> urediSadrzaj(
+    String id,
+    String naslov,
+    String autor,
+    String imeOsobe,
+    String date,
+    bool availability,
+    String signature,
+  ) async {
+    try {
+      final uri = Uri.http(AppConfig.backendUrl, '/library/api/editBook');
+      final body = jsonEncode({
+        'id': id,
+        'title': naslov,
+        'author': autor,
+        'borrowedBy': imeOsobe,
+        'date': date,
+        'availability': availability,
+        'signature': signature,
+      });
 
-    final response = await AuthService.authenticatedPost(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: body,
-    );
+      final response = await AuthService.authenticatedPost(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return true;
-    } else {
-      print('Greška pri uređivanju: ${response.statusCode} - ${response.body}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        print(
+          'Greška pri uređivanju: ${response.statusCode} - ${response.body}',
+        );
+        return false;
+      }
+    } catch (e) {
+      print('Greška prilikom uređivanja knjige: $e');
       return false;
     }
-  } catch (e) {
-    print('Greška prilikom uređivanja knjige: $e');
-    return false;
   }
-}
-
 
   Future<bool> obrisiKnjigu(String id) async {
     try {
@@ -232,7 +266,11 @@ void initState() {
       if (id.isNotEmpty) {
         queryParams['id'] = id;
       }
-      final uri = Uri.http(AppConfig.backendUrl, '/library/api/deleteBook', queryParams);
+      final uri = Uri.http(
+        AppConfig.backendUrl,
+        '/library/api/deleteBook',
+        queryParams,
+      );
 
       final response = await AuthService.authenticatedGet(uri);
       if (response.statusCode == 200) {
@@ -249,7 +287,8 @@ void initState() {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     if (!_populatedFromArgs && args != null) {
       _idController.text = args['id']?.toString() ?? '';
@@ -271,12 +310,16 @@ void initState() {
         title: const Text('Knjižnica Župe Bl. Alojzija Stepinca Duga Resa'),
         foregroundColor: Colors.white,
         actions: [
-          const Center(child: Text('Admin', style: TextStyle(color: Colors.white))),
+          const Center(
+            child: Text('Admin', style: TextStyle(color: Colors.white)),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: TextButton(
               onPressed: () => Navigator.pushNamed(context, '/'),
-              child: const CircleAvatar(backgroundImage: AssetImage('asset/img1.jpg')),
+              child: const CircleAvatar(
+                backgroundImage: AssetImage('asset/img1.jpg'),
+              ),
             ),
           ),
         ],
@@ -300,9 +343,16 @@ void initState() {
                           children: [
                             const Padding(
                               padding: EdgeInsets.all(25),
-                              child: Text('Izdavanje/Povrat/Brisanje knjige', style: TextStyle(fontSize: 25)),
+                              child: Text(
+                                'Izdavanje/Povrat/Brisanje knjige',
+                                style: TextStyle(fontSize: 25),
+                              ),
                             ),
-                            Divider(height: 5, color: Colors.grey.shade100, thickness: 1),
+                            Divider(
+                              height: 5,
+                              color: Colors.grey.shade100,
+                              thickness: 1,
+                            ),
                             _buildInputRow(
                               icon: Icons.numbers,
                               label: 'ID knjige*',
@@ -328,7 +378,8 @@ void initState() {
                               icon: Icons.person_outline,
                               label: 'Ime osobe*',
                               controller: _imeOsobeController,
-                              hintText: 'Unesite ime osobe kojoj se izdaje knjiga',
+                              hintText:
+                                  'Unesite ime osobe kojoj se izdaje knjiga',
                               readOnly: _fieldsImeReadOnly,
                             ),
                             _buildInputRow(
@@ -339,14 +390,16 @@ void initState() {
                               readOnly: _fieldsAreReadOnly,
                               onTap: () async {
                                 DateTime? pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime(2024),
-                                lastDate: DateTime(2100),
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2024),
+                                  lastDate: DateTime(2100),
                                 );
 
                                 if (pickedDate != null) {
-                                  String formattedDate = DateFormat('dd.MM.yyyy').format(pickedDate);
+                                  String formattedDate = DateFormat(
+                                    'dd.MM.yyyy',
+                                  ).format(pickedDate);
                                   _datumController.text = formattedDate;
                                 }
                               },
@@ -379,7 +432,10 @@ void initState() {
             child: FloatingActionButton.extended(
               heroTag: 'izdavanje',
               onPressed: _handleIzdavanje,
-              label: const Text('Izdavanje knjige', style: TextStyle(color: Colors.white)),
+              label: const Text(
+                'Izdavanje knjige',
+                style: TextStyle(color: Colors.white),
+              ),
               icon: const Icon(Icons.book_outlined, color: Colors.white),
               backgroundColor: Colors.blue[900],
             ),
@@ -389,7 +445,10 @@ void initState() {
             child: FloatingActionButton.extended(
               heroTag: 'povrat',
               onPressed: _handlePovrat,
-              label: const Text('Povrat knjige', style: TextStyle(color: Colors.white)),
+              label: const Text(
+                'Povrat knjige',
+                style: TextStyle(color: Colors.white),
+              ),
               icon: const Icon(Icons.keyboard_return, color: Colors.white),
               backgroundColor: Colors.blue[700],
             ),
@@ -398,11 +457,17 @@ void initState() {
             padding: const EdgeInsets.fromLTRB(0, 0, 20, 40),
             child: FloatingActionButton.extended(
               heroTag: 'urediknjigu',
-              onPressed: (){
+              onPressed: () {
                 _handleSadrzaj();
               },
-              label: Text(_saveediting ? 'Spremi' :' Uredi detalje', style: TextStyle(color: Colors.white)),
-              icon:  Icon(_saveediting ? Icons.save : Icons.edit, color: Colors.white),
+              label: Text(
+                _saveediting ? 'Spremi' : ' Uredi detalje',
+                style: TextStyle(color: Colors.white),
+              ),
+              icon: Icon(
+                _saveediting ? Icons.save : Icons.edit,
+                color: Colors.white,
+              ),
               backgroundColor: Colors.blue[700],
             ),
           ),
@@ -411,7 +476,10 @@ void initState() {
             child: FloatingActionButton.extended(
               heroTag: 'brisanje',
               onPressed: _handleDelete,
-              label: const Text('Brisanje knjige', style: TextStyle(color: Colors.white)),
+              label: const Text(
+                'Brisanje knjige',
+                style: TextStyle(color: Colors.white),
+              ),
               icon: const Icon(Icons.delete, color: Colors.white),
               backgroundColor: Colors.red[700],
             ),
@@ -537,9 +605,12 @@ void initState() {
 
     if (naslov.isEmpty || autor.isEmpty || imeOsobe.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Molimo ispunite sva polja.'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Molimo ispunite sva polja.'),
+          backgroundColor: Colors.red,
+        ),
       );
-            setState(() {
+      setState(() {
         _fieldsImeReadOnly = true;
       });
       return;
@@ -548,7 +619,10 @@ void initState() {
     bool dostupna = await provjeriDostupnostKnjige(id);
     if (!dostupna) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Knjiga nije dostupna za izdavanje.'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Knjiga nije dostupna za izdavanje.'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -556,12 +630,18 @@ void initState() {
     bool uspjeh = await izdajKnjigu(id, imeOsobe, date);
     if (uspjeh) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Knjiga izdana za $imeOsobe!'), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text('Knjiga izdana za $imeOsobe!'),
+          backgroundColor: Colors.green,
+        ),
       );
       await _refreshBookDetails(id);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Došlo je do greške prilikom izdavanja.'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Došlo je do greške prilikom izdavanja.'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -573,9 +653,16 @@ void initState() {
     String imeOsobe = _imeOsobeController.text.trim();
     String date = _datumController.text.trim();
 
-    if (id.isEmpty || naslov.isEmpty || autor.isEmpty || imeOsobe.isEmpty ||date.isEmpty) {
+    if (id.isEmpty ||
+        naslov.isEmpty ||
+        autor.isEmpty ||
+        imeOsobe.isEmpty ||
+        date.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Molimo ispunite sva polja za povrat.'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Molimo ispunite sva polja za povrat.'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -583,118 +670,137 @@ void initState() {
     bool uspjeh = await vratiKnjigu(id);
     if (uspjeh) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Knjiga uspješno vraćena!'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('Knjiga uspješno vraćena!'),
+          backgroundColor: Colors.green,
+        ),
       );
       await _refreshBookDetails(id);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Došlo je do greške pri povratu knjige.'), backgroundColor: Colors.red),
-      );
-    }
-  }
-
-  void _handleSadrzaj() async {
-  String id = _idController.text.trim();
-  String naslov = _naslovController.text.trim();
-  String autor = _autorController.text.trim();
-  String imeOsobe = _imeOsobeController.text.trim();
-  String date = _datumController.text.trim();
-  String signature = _signatureController.text.trim();
-
-  if (!_saveediting) {
-    setState(() {
-      _saveediting = true;
-      _fieldsAreReadOnly = false;
-      _fieldsImeReadOnly = _availability;
-    });
-  } else {
-    // Proslijedi i availability
-    bool uspjeh = await urediSadrzaj(id, naslov, autor, imeOsobe, date ,_availability, signature);
-    if (uspjeh) {
-      setState(() {
-        _saveediting = false;
-        _fieldsAreReadOnly = true;
-        _fieldsImeReadOnly = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Detalji knjige uspješno spremljeni.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Greška prilikom spremanja detalja knjige.'),
+          content: Text('Došlo je do greške pri povratu knjige.'),
           backgroundColor: Colors.red,
         ),
       );
     }
   }
-}
+
+  void _handleSadrzaj() async {
+    String id = _idController.text.trim();
+    String naslov = _naslovController.text.trim();
+    String autor = _autorController.text.trim();
+    String imeOsobe = _imeOsobeController.text.trim();
+    String date = _datumController.text.trim();
+    String signature = _signatureController.text.trim();
+
+    if (!_saveediting) {
+      setState(() {
+        _saveediting = true;
+        _fieldsAreReadOnly = false;
+        _fieldsImeReadOnly = _availability;
+      });
+    } else {
+      // Proslijedi i availability
+      bool uspjeh = await urediSadrzaj(
+        id,
+        naslov,
+        autor,
+        imeOsobe,
+        date,
+        _availability,
+        signature,
+      );
+      if (uspjeh) {
+        setState(() {
+          _saveediting = false;
+          _fieldsAreReadOnly = true;
+          _fieldsImeReadOnly = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Detalji knjige uspješno spremljeni.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Greška prilikom spremanja detalja knjige.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   void _handleDelete() async {
-
     String id = _idController.text.trim();
     bool potvrda = await showDialog(
-      context: context, 
+      context: context,
       builder: (context) => AlertDialog(
         title: Center(child: Text('Potvrda brisanja')),
         content: Text('Jeste li sigurni da želite obrisati sadržaj?'),
         actions: [
           FloatingActionButton.extended(
-              onPressed: (){
-                Navigator.of(context).pop(true);
-              },
-              backgroundColor: Colors.green,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            label: Text(
+              'POTVRDI',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
               ),
-                label: Text(
-                  'POTVRDI',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+            ),
+          ),
+          SizedBox(width: 5.0),
+          FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            backgroundColor: Colors.red,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            label: Text(
+              'ODUSTANI',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
               ),
-            SizedBox(width: 5.0),
-            FloatingActionButton.extended(
-              onPressed: (){
-                Navigator.of(context).pop(false);
-              },
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-                label: Text(
-                  'ODUSTANI',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+            ),
+          ),
         ],
       ),
     );
 
-    if(potvrda){
-    bool uspjeh = await obrisiKnjigu(id);
-    if (uspjeh) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Knjiga je uspješno obrisana!'), backgroundColor: Colors.green),
-      );
-      _idController.clear();
-      _naslovController.clear();
-      _autorController.clear();
-      _imeOsobeController.clear();
-      Navigator.pushNamed(context, '/pretrazivanje');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Došlo je do greške prilikom brisanja knjige.'), backgroundColor: Colors.red),
+    if (potvrda) {
+      bool uspjeh = await obrisiKnjigu(id);
+      if (uspjeh) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Knjiga je uspješno obrisana!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _idController.clear();
+        _naslovController.clear();
+        _autorController.clear();
+        _imeOsobeController.clear();
+        Navigator.pushNamed(context, '/pretrazivanje');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Došlo je do greške prilikom brisanja knjige.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
