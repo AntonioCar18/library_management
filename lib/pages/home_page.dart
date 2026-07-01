@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:softwareknjiznica/pages/izdavanje_knjige.dart';
 import 'package:softwareknjiznica/pages/pretrazivanje.dart';
 import 'package:softwareknjiznica/pages/upisknjige.dart';
+import 'package:softwareknjiznica/pages/zakasnine.dart';
 
 import '../services/auth_service.dart';
 
@@ -104,6 +105,33 @@ class HomePage extends StatelessWidget {
                         const SizedBox(height: 20.0),
                         const Text(
                           'UPISIVANJE NOVE KNJIGE',
+                          style: TextStyle(
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 100.0),
+                    Column(
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/zakasnine');
+                          },
+                          child: CircleAvatar(
+                            radius: 120.0,
+                            backgroundColor: Colors.blue[900],
+                            child: const Icon(
+                              Icons.schedule,
+                              size: 70.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20.0),
+                        const Text(
+                          'ZAKASNINE',
                           style: TextStyle(
                             fontSize: 25.0,
                             fontWeight: FontWeight.bold,

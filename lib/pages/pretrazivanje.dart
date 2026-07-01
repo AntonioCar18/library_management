@@ -29,8 +29,7 @@ class _SearchBookState extends State<SearchBook> {
           child: Text(
             text,
             textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
+            maxLines: 1,
             softWrap: false,
           ),
         ),
@@ -170,7 +169,7 @@ class _SearchBookState extends State<SearchBook> {
                                         columns: const [
                                           DataColumn(
                                             label: SizedBox(
-                                              width: 30,
+                                              width: 70,
                                               child: Align(
                                                 alignment: Alignment.center,
                                                 child: Text(
@@ -256,7 +255,7 @@ class _SearchBookState extends State<SearchBook> {
                                               );
                                             },
                                             cells: [
-                                              centeredCell(book['id'].toString(), width: 30),
+                                              centeredCell(book['id'].toString(), width: 70),
                                               centeredCell(book['title'] ?? '', width: 150),
                                               centeredCell(book['author'] ?? '', width: 100),
                                               DataCell(

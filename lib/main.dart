@@ -5,6 +5,7 @@ import 'pages/izdavanje_knjige.dart';
 import 'pages/test_page.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
+import 'package:softwareknjiznica/pages/zakasnine.dart';
 import 'package:softwareknjiznica/services/auth_service.dart';
 import 'dart:io';
 
@@ -38,6 +39,7 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => const HomePage(),
         '/pretrazivanje': (context) => const SearchBook(),
         '/upisknjige': (context) => const EnterBook(),
+        '/zakasnine': (context) => const LateFeesPage(),
         '/test': (context) => const TestPage(),
       },
       onGenerateRoute: (settings) {
