@@ -31,9 +31,81 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    const espresso = Color(0xFF3E2A23);
+    const mocha = Color(0xFF5C4337);
+    const sand = Color(0xFFE9DDCF);
+    const ivory = Color(0xFFF7F3EE);
+
     return MaterialApp(
       navigatorKey: AuthService.navigatorKey,
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: ivory,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: mocha,
+          brightness: Brightness.light,
+          primary: espresso,
+          secondary: mocha,
+          surface: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: espresso,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 4,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          labelStyle: const TextStyle(color: espresso),
+          hintStyle: TextStyle(color: Colors.brown.shade300),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFFD9C6AE)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFFD9C6AE)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: mocha, width: 2),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: mocha,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            elevation: 0,
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: mocha,
+          foregroundColor: Colors.white,
+        ),
+        dividerTheme: DividerThemeData(
+          color: sand,
+          thickness: 1,
+        ),
+      ),
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),

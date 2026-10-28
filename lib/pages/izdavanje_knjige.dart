@@ -302,16 +302,23 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
       _populatedFromArgs = true;
     }
 
+    const espresso = Color(0xFF3E2A23);
+    const mocha = Color(0xFF5C4337);
+    const sand = Color(0xFFE9DDCF);
+    const ivory = Color(0xFFF7F3EE);
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Scaffold(
+      backgroundColor: ivory,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        toolbarHeight: 100.0,
-        backgroundColor: Colors.blue[900],
+        toolbarHeight: isMobile ? 80.0 : 100.0,
+        backgroundColor: espresso,
         title: const Text('Knjižnica Župe Bl. Alojzija Stepinca Duga Resa'),
         foregroundColor: Colors.white,
         actions: [
           const Center(
-            child: Text('Admin', style: TextStyle(color: Colors.white)),
+            child: Text('Admin', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
           ),
           Padding(
             padding: const EdgeInsets.only(right: 10),
@@ -324,175 +331,128 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
           ),
         ],
       ),
-      body: Row(
-        children: [
-          _buildSidebar(),
-          Expanded(
-            child: Container(
-              color: Colors.grey.shade100,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Container(
-                      height: constraints.maxHeight,
-                      color: Colors.white,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.all(25),
-                              child: Text(
-                                'Izdavanje/Povrat/Brisanje knjige',
-                                style: TextStyle(fontSize: 25),
-                              ),
-                            ),
-                            Divider(
-                              height: 5,
-                              color: Colors.grey.shade100,
-                              thickness: 1,
-                            ),
-                            _buildInputRow(
-                              icon: Icons.numbers,
-                              label: 'ID knjige*',
-                              controller: _idController,
-                              hintText: 'ID knjige',
-                              readOnly: _fieldsAreReadOnly,
-                            ),
-                            _buildInputRow(
-                              icon: Icons.book,
-                              label: 'Naslov*',
-                              controller: _naslovController,
-                              hintText: 'Unesite naslov knjige',
-                              readOnly: _fieldsAreReadOnly,
-                            ),
-                            _buildInputRow(
-                              icon: Icons.person,
-                              label: 'Autor*',
-                              controller: _autorController,
-                              hintText: 'Unesite ime i prezime autora knjige',
-                              readOnly: _fieldsAreReadOnly,
-                            ),
-                            _buildInputRow(
-                              icon: Icons.person_outline,
-                              label: 'Ime osobe*',
-                              controller: _imeOsobeController,
-                              hintText:
-                                  'Unesite ime osobe kojoj se izdaje knjiga',
-                              readOnly: _fieldsImeReadOnly,
-                            ),
-                            _buildInputRow(
-                              icon: Icons.calendar_month,
-                              label: 'Datum*',
-                              controller: _datumController,
-                              hintText: 'Odaberite datum',
-                              readOnly: _fieldsAreReadOnly,
-                              onTap: () async {
-                                DateTime? pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2024),
-                                  lastDate: DateTime(2100),
-                                );
-
-                                if (pickedDate != null) {
-                                  String formattedDate = DateFormat(
-                                    'dd.MM.yyyy',
-                                  ).format(pickedDate);
-                                  _datumController.text = formattedDate;
-                                }
-                              },
-                            ),
-                            _buildInputRow(
-                              icon: Icons.bookmark,
-                              label: 'Signatura',
-                              controller: _signatureController,
-                              hintText: 'Signatura knjige',
-                              readOnly: _fieldsAreReadOnly,
-                            ),
-                            const SizedBox(height: 60),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+      body: SafeArea(
+        child: isMobile
+            ? Column(
+                children: [
+                  SizedBox(
+                    height: 120,
+                    child: _buildSidebar(compact: true),
+                  ),
+                  Expanded(
+                    child: _buildFormBody(context),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  _buildSidebar(),
+                  Expanded(
+                    child: _buildFormBody(context),
+                  ),
+                ],
               ),
-            ),
-          ),
-        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 40),
-            child: FloatingActionButton.extended(
-              heroTag: 'izdavanje',
-              onPressed: _handleIzdavanje,
-              label: const Text(
-                'Izdavanje knjige',
-                style: TextStyle(color: Colors.white),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(right: isMobile ? 8 : 16, bottom: isMobile ? 12 : 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: FloatingActionButton.extended(
+                heroTag: 'izdavanje',
+                onPressed: _handleIzdavanje,
+                label: const Text('Izdavanje knjige', style: TextStyle(color: Colors.white)),
+                icon: const Icon(Icons.book_outlined, color: Colors.white),
+                backgroundColor: espresso,
               ),
-              icon: const Icon(Icons.book_outlined, color: Colors.white),
-              backgroundColor: Colors.blue[900],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 40),
-            child: FloatingActionButton.extended(
-              heroTag: 'povrat',
-              onPressed: _handlePovrat,
-              label: const Text(
-                'Povrat knjige',
-                style: TextStyle(color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: FloatingActionButton.extended(
+                heroTag: 'povrat',
+                onPressed: _handlePovrat,
+                label: const Text('Povrat knjige', style: TextStyle(color: Colors.white)),
+                icon: const Icon(Icons.keyboard_return, color: Colors.white),
+                backgroundColor: mocha,
               ),
-              icon: const Icon(Icons.keyboard_return, color: Colors.white),
-              backgroundColor: Colors.blue[700],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 40),
-            child: FloatingActionButton.extended(
-              heroTag: 'urediknjigu',
-              onPressed: () {
-                _handleSadrzaj();
-              },
-              label: Text(
-                _saveediting ? 'Spremi' : ' Uredi detalje',
-                style: TextStyle(color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: FloatingActionButton.extended(
+                heroTag: 'urediknjigu',
+                onPressed: () {
+                  _handleSadrzaj();
+                },
+                label: Text(_saveediting ? 'Spremi' : ' Uredi detalje', style: const TextStyle(color: Colors.white)),
+                icon: Icon(_saveediting ? Icons.save : Icons.edit, color: Colors.white),
+                backgroundColor: mocha,
               ),
-              icon: Icon(
-                _saveediting ? Icons.save : Icons.edit,
-                color: Colors.white,
-              ),
-              backgroundColor: Colors.blue[700],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 40, 40),
-            child: FloatingActionButton.extended(
+            FloatingActionButton.extended(
               heroTag: 'brisanje',
               onPressed: _handleDelete,
-              label: const Text(
-                'Brisanje knjige',
-                style: TextStyle(color: Colors.white),
-              ),
+              label: const Text('Brisanje knjige', style: TextStyle(color: Colors.white)),
               icon: const Icon(Icons.delete, color: Colors.white),
               backgroundColor: Colors.red[700],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSidebar() {
+  Widget _buildSidebar({bool compact = false}) {
+    if (compact) {
+      return Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF9F5F1),
+          border: Border(bottom: BorderSide(color: Color(0xFFE7D8C5))),
+        ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildSidebarItem(
+                hovering: _isHovering,
+                onEnter: () => setState(() => _isHovering = true),
+                onExit: () => setState(() => _isHovering = false),
+                icon: Icons.search,
+                label: 'Pretraživanje knjige',
+                onTap: () => Navigator.pushNamed(context, '/pretrazivanje'),
+              ),
+              _buildSidebarItem(
+                hovering: _isHovering1,
+                onEnter: () => setState(() => _isHovering1 = true),
+                onExit: () => setState(() => _isHovering1 = false),
+                icon: Icons.add,
+                label: 'Dodavanje nove knjige',
+                onTap: () => Navigator.pushNamed(context, '/upisknjige'),
+              ),
+              _buildSidebarItem(
+                hovering: _isHovering3,
+                onEnter: () => setState(() => _isHovering3 = true),
+                onExit: () => setState(() => _isHovering3 = false),
+                icon: Icons.home,
+                label: 'Povratak na početnu',
+                onTap: () => Navigator.pushNamed(context, '/home'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Container(
       width: 300,
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF9F5F1),
+        border: Border(right: BorderSide(color: Color(0xFFE7D8C5))),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -520,6 +480,26 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
             label: 'Povratak na početnu',
             onTap: () => Navigator.pushNamed(context, '/home'),
           ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE9DDCF),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Operacije', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF3E2A23))),
+                  SizedBox(height: 8),
+                  Text('Izdavanje, povrat i brisanje knjiga u jednom prikazu.', style: TextStyle(fontSize: 13, color: Color(0xFF3E2A23))),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -541,14 +521,16 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: hovering ? Colors.grey.shade300 : Colors.transparent,
+            color: hovering ? const Color(0xFFE9DDCF) : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
           child: Row(
             children: [
-              Icon(icon),
+              Icon(icon, color: const Color(0xFF3E2A23)),
               const SizedBox(width: 15),
-              Text(label, style: const TextStyle(fontSize: 18)),
+              Text(label, style: const TextStyle(fontSize: 18, color: Color(0xFF3E2A23))),
             ],
           ),
         ),
@@ -562,8 +544,38 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
     required TextEditingController controller,
     required String hintText,
     bool readOnly = true,
-    VoidCallback? onTap, // ← NOVO
+    VoidCallback? onTap,
   }) {
+    final isMobile = MediaQuery.of(context).size.width < 700;
+
+    if (isMobile) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: const Color(0xFF5C4337)),
+                const SizedBox(width: 10),
+                Text(label, style: const TextStyle(fontSize: 18, color: Color(0xFF3E2A23))),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              readOnly: readOnly,
+              onTap: onTap,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                hintText: hintText,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(30, 20, 0, 20),
       child: Row(
@@ -573,9 +585,9 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
             width: 150,
             child: Row(
               children: [
-                Icon(icon),
+                Icon(icon, color: const Color(0xFF5C4337)),
                 const SizedBox(width: 10),
-                Text(label, style: const TextStyle(fontSize: 20)),
+                Text(label, style: const TextStyle(fontSize: 20, color: Color(0xFF3E2A23))),
               ],
             ),
           ),
@@ -586,12 +598,121 @@ class _IzdavanjeVracanjeKnjigeState extends State<IzdavanjeVracanjeKnjige> {
               readOnly: readOnly,
               onTap: onTap,
               decoration: InputDecoration(
-                border: const UnderlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 hintText: hintText,
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFormBody(BuildContext context) {
+    const espresso = Color(0xFF3E2A23);
+    const sand = Color(0xFFE9DDCF);
+    const ivory = Color(0xFFF7F3EE);
+    final isMobile = MediaQuery.of(context).size.width < 700;
+
+    return Container(
+      color: ivory,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Padding(
+            padding: EdgeInsets.all(isMobile ? 12 : 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.brown.withOpacity(0.08),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: isMobile ? 140 : 40),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(25),
+                        child: Text(
+                          'Izdavanje/Povrat/Brisanje knjige',
+                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700, color: espresso),
+                        ),
+                      ),
+                      Divider(
+                        height: 5,
+                        color: sand,
+                        thickness: 1,
+                      ),
+                      _buildInputRow(
+                        icon: Icons.numbers,
+                        label: 'ID knjige*',
+                        controller: _idController,
+                        hintText: 'ID knjige',
+                        readOnly: _fieldsAreReadOnly,
+                      ),
+                      _buildInputRow(
+                        icon: Icons.book,
+                        label: 'Naslov*',
+                        controller: _naslovController,
+                        hintText: 'Unesite naslov knjige',
+                        readOnly: _fieldsAreReadOnly,
+                      ),
+                      _buildInputRow(
+                        icon: Icons.person,
+                        label: 'Autor*',
+                        controller: _autorController,
+                        hintText: 'Unesite ime i prezime autora knjige',
+                        readOnly: _fieldsAreReadOnly,
+                      ),
+                      _buildInputRow(
+                        icon: Icons.person_outline,
+                        label: 'Ime osobe*',
+                        controller: _imeOsobeController,
+                        hintText: 'Unesite ime osobe kojoj se izdaje knjiga',
+                        readOnly: _fieldsImeReadOnly,
+                      ),
+                      _buildInputRow(
+                        icon: Icons.calendar_month,
+                        label: 'Datum*',
+                        controller: _datumController,
+                        hintText: 'Odaberite datum',
+                        readOnly: _fieldsAreReadOnly,
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2024),
+                            lastDate: DateTime(2100),
+                          );
+
+                          if (pickedDate != null) {
+                            String formattedDate = DateFormat('dd.MM.yyyy').format(pickedDate);
+                            _datumController.text = formattedDate;
+                          }
+                        },
+                      ),
+                      _buildInputRow(
+                        icon: Icons.bookmark,
+                        label: 'Signatura',
+                        controller: _signatureController,
+                        hintText: 'Signatura knjige',
+                        readOnly: _fieldsAreReadOnly,
+                      ),
+                      const SizedBox(height: 60),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
